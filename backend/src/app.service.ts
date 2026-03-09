@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from './prisma.service';
-import { Profile } from '@prisma/client';
+import { InjectRepository } from '@mikro-orm/nestjs';
+import { EntityRepository } from '@mikro-orm/core';
+import { Profile } from './entities/profile.entity';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    @InjectRepository(Profile)
+    private profileRepository: EntityRepository<Profile>,
+  ) {}
 
   getHello(): string {
     return 'Hello from My Portal Backend!';
@@ -16,7 +20,7 @@ export class AppService {
     experience: string[];
   }> {
     // Fetch profile from database
-    const profile = await this.prisma.profile.findFirst();
+    const profile = await this.profileRepository.findOne({});
     if (profile) {
       return {
         name: profile.name,
@@ -34,13 +38,15 @@ export class AppService {
 
   // Example method to create a profile
   async createProfile(data: { name: string; title: string }): Promise<Profile> {
-    return this.prisma.profile.create({
-      data,
-    });
+    const profile = new Profile();
+    profile.name = data.name;
+    profile.title = data.title;
+    await this.profileRepository.persistAndFlush(profile);
+    return profile;
   }
 
   // Get all profiles
   async getProfiles(): Promise<Profile[]> {
-    return this.prisma.profile.findMany();
+    return this.profileRepository.findAll();
   }
 }

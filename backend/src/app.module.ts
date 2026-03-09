@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from './prisma.module';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import mikroOrmConfig from './mikro-orm.config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [MikroOrmModule.forRoot(mikroOrmConfig)],
   controllers: [AppController],
   providers: [AppService],
 })
