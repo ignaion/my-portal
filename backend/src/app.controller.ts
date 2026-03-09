@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
+import { Profile } from '@prisma/client';
 
 @Controller()
 export class AppController {
@@ -11,11 +12,16 @@ export class AppController {
   }
 
   @Get('api/about')
-  getAbout(): {
+  async getAbout(): Promise<{
     name: string;
     title: string;
     experience: string[];
-  } {
+  }> {
     return this.appService.getAbout();
+  }
+
+  @Get('api/profiles')
+  async getProfiles(): Promise<Profile[]> {
+    return this.appService.getProfiles();
   }
 }
