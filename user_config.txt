@@ -1,0 +1,2 @@
+user.email=igna.resmana@gmail.com
+user.name=Nonov

@@ -1,0 +1,2 @@
+error: src refspec non-existent-branch does not match any
+error: failed to push some refs to 'github.com:ignaion/my-portal.git'

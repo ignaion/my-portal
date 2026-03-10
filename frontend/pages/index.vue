@@ -1,58 +1,32 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-    <div class="container mx-auto px-4 py-12">
-      <header class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ about?.name || 'Loading...' }}</h1>
-        <p class="text-xl text-gray-600">{{ about?.title || 'Professional Portfolio' }}</p>
-      </header>
-
-      <section class="mb-12">
-        <h2 class="text-2xl font-semibold mb-4 text-gray-800">About Me</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="font-medium text-lg mb-3">Experience</h3>
-            <ul class="list-disc list-inside space-y-2">
-              <li v-for="exp in about?.experience || []" :key="exp">{{ exp }}</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h3 class="font-medium text-lg mb-3">Backend API Status</h3>
-          <p class="text-gray-700">{{ helloMessage || 'Checking backend...' }}</p>
-        </div>
-      </section>
+  <section class="max-w-4xl mx-auto text-center">
+    <div class="mb-8">
+      <h1 class="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+        Hi, I'm Igna Ion Resmana
+      </h1>
+      <p class="text-xl text-gray-600 dark:text-gray-300">
+        Software Engineer specializing in NodeJS, NestJS, Vue, and Flutter
+      </p>
     </div>
-  </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Backend Development</h3>
+        <p class="text-gray-600 dark:text-gray-300">NodeJS, NestJS, PostgreSQL, Drizzle ORM</p>
+      </div>
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Frontend Development</h3>
+        <p class="text-gray-600 dark:text-gray-300">Vue.js, Nuxt.js, Tailwind CSS</p>
+      </div>
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow">
+        <h3 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Mobile Development</h3>
+        <p class="text-gray-600 dark:text-gray-300">Flutter, Cross-platform Apps</p>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useApi } from '../composables/useApi';
-
-const { fetchHello, fetchAbout } = useApi();
-const helloMessage = ref<string>('');
-const about = ref<{
-  name: string;
-  title: string;
-  experience: string[];
-}>();
-
-onMounted(async () => {
-  try {
-    helloMessage.value = await fetchHello();
-    about.value = await fetchAbout();
-  } catch (error) {
-    helloMessage.value = 'Backend connection failed';
-    console.error('API error:', error);
-  }
-});
+useHead({
+  title: 'Home - Igna Ion Resmana'
+})
 </script>
-
-<style>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-</style>

@@ -1,7 +1,7 @@
 {
   "name": "my-portal-frontend",
+  "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
@@ -10,8 +10,11 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "nuxt": "^3.13.0",
-    "vue": "latest",
-    "vue-router": "latest"
+    "@nuxt/ui": "^2.14.0",
+    "nuxt": "^3.10.0",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@nuxtjs/tailwindcss": "^6.11.0"
   }
 }
