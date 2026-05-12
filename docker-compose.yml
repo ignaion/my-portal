@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  postgres:
+  personal-website-postgres:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -21,7 +21,7 @@ services:
   backend:
     build: ./backend
     environment:
-      DB_HOST: postgres
+      DB_HOST: personal-website-postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -31,7 +31,7 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      postgres:
+      personal-website-postgres:
         condition: service_healthy
     restart: unless-stopped
 
