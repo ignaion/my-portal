@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
 import { blogPosts } from '../../db/schema';
+import renderMarkdownToSafeHtml from '../../utils/markdown';
 
 @Injectable()
 export class BlogService {
@@ -19,7 +20,17 @@ export class BlogService {
   }
 
   async createPost(createPostDto: typeof blogPosts.$inferInsert) {
-    const [post] = await this.db.insert(blogPosts).values(createPostDto).returning();
+    // If content is provided in markdown, render and sanitize to safe HTML
+    const values = { ...createPostDto } as any;
+    if (values.contentMarkdown) {
+      values.content = renderMarkdownToSafeHtml(values.contentMarkdown);
+    } else if (values.content) {
+      // sanitize HTML content as a fallback
+      values.content = renderMarkdownToSafeHtml(values.content);
+    }
+
+    const [post] = await this.db.insert(blogPosts).values(values).returning();
     return post;
   }
 }
+
