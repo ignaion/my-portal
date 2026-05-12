@@ -1,9 +1,9 @@
 export const useApi = () => {
   const config = useRuntimeConfig();
-  const apiBase = config.public.apiBase;
+  const apiBase = config.public.apiBaseUrl || config.public.apiBase || 'http://localhost:3001';
 
   const fetchHello = async () => {
-    return await $fetch<string>(`${apiBase}/hello`);
+    return await $fetch<string>(`${apiBase}/api/hello`);
   };
 
   const fetchAbout = async () => {
@@ -11,7 +11,7 @@ export const useApi = () => {
       name: string;
       title: string;
       experience: string[];
-    }>(`${apiBase}/about`);
+    }>(`${apiBase}/api/about`);
   };
 
   return {
