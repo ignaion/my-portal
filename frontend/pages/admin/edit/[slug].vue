@@ -45,9 +45,36 @@ onMounted(async () => {
   title.value = res.title || ''
   slug.value = res.slug || ''
   excerpt.value = res.excerpt || ''
-  // try to convert HTML back to markdown not implemented — we store only HTML; leave content field empty for now
-  contentMarkdown.value = ''
   isPublished.value = !!res.isPublished
+
+  // Prefer the stored markdown if present
+  if (res.contentMarkdown) {
+    contentMarkdown.value = res.contentMarkdown
+    return
+  }
+
+  // If only HTML content exists, convert to Markdown on the client using Turndown (loaded from CDN)
+  if (res.content && process.client) {
+    try {
+      if (typeof (window as any).TurndownService === 'undefined') {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script')
+          s.src = 'https://unpkg.com/turndown@7.1.1/dist/turndown.js'
+          s.onload = () => resolve(undefined)
+          s.onerror = () => reject(new Error('Failed to load turndown'))
+          document.head.appendChild(s)
+        })
+      }
+      const T = (window as any).TurndownService
+      const t = new T()
+      contentMarkdown.value = t.turndown(res.content)
+    } catch (e) {
+      // fallback: strip HTML tags
+      contentMarkdown.value = res.content.replace(/<[^>]+>/g, '').trim()
+    }
+  } else {
+    contentMarkdown.value = res.contentMarkdown || ''
+  }
 })
 
 const submit = async () => {
