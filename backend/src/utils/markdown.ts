@@ -1,5 +1,7 @@
 import { marked } from 'marked';
-import createDOMPurify from 'dompurify';
+// dompurify has different default export shapes depending on ESM/CJS interop.
+// Use a runtime-compatible require fallback so the built JS works in Node.
+const createDOMPurify = (require('dompurify') as any).default || require('dompurify');
 import { JSDOM } from 'jsdom';
 
 const window = new JSDOM('').window as unknown as Window & typeof globalThis;
