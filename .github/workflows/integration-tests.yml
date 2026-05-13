@@ -96,3 +96,40 @@ jobs:
         run: |
           cd backend
           npm run test:integration
+
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: integration
+    if: ${{ github.ref == 'refs/heads/main' && needs.integration.result == 'success' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to VPS (git pull & docker compose)
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          set -euo pipefail
+          ssh -o StrictHostKeyChecking=yes -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" << 'EOF'
+            set -e
+            cd /home/ionig/my-portal
+            git fetch --all --prune
+            git reset --hard origin/main
+            docker compose -f docker-compose.yml pull || true
+            docker compose -f docker-compose.yml up -d --no-deps --build frontend backend
+            docker image prune -f || true
+          EOF
