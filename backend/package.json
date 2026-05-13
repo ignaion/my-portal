@@ -27,7 +27,8 @@
     "dompurify": "^3.0.4",
     "@mikro-orm/core": "^5.0.0",
     "@mikro-orm/postgresql": "^5.0.0",
-    "@mikro-orm/nestjs": "^5.0.0"
+    "@mikro-orm/nestjs": "^5.0.0",
+    "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",

@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  personal-website-postgres:
+  postgres:
     image: postgres:15-alpine
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -21,18 +21,17 @@ services:
   backend:
     build: ./backend
     environment:
-      DB_HOST: personal-website-postgres
+      DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-my_portal}
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-this}
-      ADMIN_API_KEY: ${ADMIN_API_KEY:-}
       PORT: 3001
     ports:
       - "3001:3001"
     depends_on:
-      personal-website-postgres:
+      postgres:
         condition: service_healthy
     restart: unless-stopped
 
@@ -40,7 +39,6 @@ services:
     build: ./frontend
     environment:
       NUXT_PUBLIC_API_BASE_URL: ${NUXT_PUBLIC_API_BASE_URL:-http://localhost:3001}
-      NUXT_PUBLIC_ADMIN_KEY: ${NUXT_PUBLIC_ADMIN_KEY:-}
     ports:
       - "3000:3000"
     depends_on:
