@@ -35,5 +35,33 @@ export class BlogService {
     const [post] = await this.db.insert(blogPosts).values(values).returning();
     return post;
   }
+
+  async updatePost(slug: string, updateDto: Partial<typeof blogPosts.$inferInsert>) {
+    const values: any = { ...updateDto };
+
+    if (values.contentMarkdown) {
+      values.content = renderMarkdownToSafeHtml(values.contentMarkdown);
+      delete values.contentMarkdown;
+    } else if (values.content) {
+      values.content = renderMarkdownToSafeHtml(values.content);
+    }
+
+    // Ensure author present
+    if (!values.author) {
+      values.author = process.env.DEFAULT_AUTHOR || 'Igna';
+    }
+
+    // If updating slug, ensure not colliding with existing post
+    if (values.slug && values.slug !== slug) {
+      const [exists] = await this.db.select().from(blogPosts).where(eq(blogPosts.slug, values.slug));
+      if (exists) {
+        throw new Error('Slug already exists');
+      }
+    }
+
+    const [post] = await this.db.update(blogPosts).set(values).where(eq(blogPosts.slug, slug)).returning();
+    return post;
+  }
 }
+
 
