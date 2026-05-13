@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, Param, Query, Headers, ForbiddenException, Req, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Headers, ForbiddenException, Req, Inject } from '@nestjs/common';
 import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { blogPosts } from '../../db/schema';
@@ -99,6 +99,33 @@ export class BlogController {
     }
 
     return this.blogService.updatePost(slug, updateDto as any);
+  }
+
+  @Delete(':slug')
+  async deletePost(
+    @Param('slug') slug: string,
+    @Headers('x-admin-key') adminKey?: string,
+    @Headers('authorization') authorization?: string,
+  ) {
+    const expected = process.env.ADMIN_API_KEY;
+    let ok = false;
+
+    if (expected && adminKey === expected) ok = true;
+
+    if (!ok && authorization) {
+      const parts = authorization.split(' ');
+      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+        const token = parts[1];
+        const verified = this.authService.verifyToken(token);
+        if (verified) ok = true;
+      }
+    }
+
+    if (!ok) {
+      throw new ForbiddenException('Invalid admin credentials');
+    }
+
+    return this.blogService.deletePost(slug);
   }
 }
 

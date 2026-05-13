@@ -67,6 +67,12 @@ export class BlogService {
     const [post] = await this.db.update(blogPosts).set(values).where(eq(blogPosts.slug, slug)).returning();
     return post;
   }
+
+  async deletePost(slug: string) {
+    const [post] = await this.db.delete(blogPosts).where(eq(blogPosts.slug, slug)).returning();
+    return post;
+  }
 }
+
 
 
