@@ -29,6 +29,9 @@ export class BlogService {
       values.content = renderMarkdownToSafeHtml(values.content);
     }
 
+    // Ensure author field present (fallback to env or 'Igna')
+    values.author = values.author || process.env.DEFAULT_AUTHOR || 'Igna';
+
     const [post] = await this.db.insert(blogPosts).values(values).returning();
     return post;
   }
