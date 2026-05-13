@@ -3,9 +3,9 @@
     <div class="flex flex-col md:flex-row gap-8 items-center mb-12">
       <div class="w-full md:w-1/3">
         <div class="aspect-square rounded-full overflow-hidden bg-gray-200 dark:bg-gray-700">
-          <img 
-            src="/avatar.jpg" 
-            alt="Igna Ion Resmana" 
+          <img
+            :src="avatarSrc"
+            alt="Igna Ion Resmana"
             class="w-full h-full object-cover"
           />
         </div>
@@ -47,4 +47,6 @@
 useHead({
   title: 'About - Igna Ion Resmana'
 })
+
+const avatarSrc = '/avatar.jpg'
 </script>
