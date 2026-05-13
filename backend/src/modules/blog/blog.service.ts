@@ -43,9 +43,8 @@ export class BlogService {
 
     if (values.contentMarkdown) {
       values.content = renderMarkdownToSafeHtml(values.contentMarkdown);
-      // store original markdown as well
-      values.content_markdown = values.contentMarkdown;
-      delete values.contentMarkdown;
+      // store original markdown in the drizzle schema field (contentMarkdown)
+      values.contentMarkdown = values.contentMarkdown;
     } else if (values.content) {
       values.content = renderMarkdownToSafeHtml(values.content);
     }
