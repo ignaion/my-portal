@@ -1,0 +1,98 @@
+name: CI — integration tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  integration:
+    name: Integration tests (backend)
+    runs-on: ubuntu-latest
+    # Only run integration if required secrets are present; otherwise the job will fail fast.
+    if: ${{ secrets.ADMIN_API_KEY && secrets.DB_PASSWORD && secrets.DB_USER && secrets.DB_NAME && secrets.JWT_SECRET }}
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.DB_NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U ${{ secrets.DB_USER }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      ADMIN_API_KEY: ${{ secrets.ADMIN_API_KEY }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      TEST_API_BASE: http://127.0.0.1:3001
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 30); do
+            pg_isready -h 127.0.0.1 -p 5432 -U $DB_USER && break || sleep 2
+          done
+        env:
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+
+      - name: Create backend .env
+        run: |
+          cat > backend/.env <<EOF
+          DB_HOST=${DB_HOST}
+          DB_PORT=${DB_PORT}
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
+          DB_NAME=${DB_NAME}
+          JWT_SECRET=${JWT_SECRET}
+          ADMIN_API_KEY=${ADMIN_API_KEY}
+          EOF
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci --prefer-offline --no-audit --no-fund
+
+      - name: Run DB migrations (drizzle-kit push)
+        run: |
+          cd backend
+          npx drizzle-kit push:pg --schema ./src/db/schema.ts --connection "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        continue-on-error: true
+
+      - name: Seed DB
+        run: |
+          cd backend
+          node ./scripts/seed.js || true
+
+      - name: Start backend
+        run: |
+          cd backend
+          npm run start:prod &
+          # wait for backend to come up
+          for i in $(seq 1 30); do
+            curl -sS ${TEST_API_BASE}/api/blog || sleep 2
+          done
+
+      - name: Run integration tests
+        run: |
+          cd backend
+          npm run test:integration
