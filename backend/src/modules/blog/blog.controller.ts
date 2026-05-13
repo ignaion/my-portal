@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Param, Query, Headers, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Headers, ForbiddenException, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { blogPosts } from '../../db/schema';
 
@@ -17,6 +18,21 @@ export class BlogController {
   @Get(':slug')
   async getPostBySlug(@Param('slug') slug: string) {
     return this.blogService.getPostBySlug(slug);
+  }
+
+  // DEBUG endpoint (temporary) to inspect header vs env without leaking full secret
+  @Get('debug')
+  async debug(@Req() req: Request) {
+    const env = process.env.ADMIN_API_KEY;
+    const header = req.headers['x-admin-key'] as string | undefined;
+    return {
+      envSet: !!env,
+      envLength: env ? env.length : null,
+      headerPresent: !!header,
+      headerLength: header ? header.length : null,
+      headerSample: header ? header.slice(0, 4) + '...' : null,
+      match: env && header ? header === env : false,
+    };
   }
 
   @Post()
