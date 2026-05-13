@@ -5,6 +5,7 @@ export const blogPosts = pgTable('blog_posts', {
   title: varchar('title', { length: 255 }).notNull(),
   slug: varchar('slug', { length: 255 }).notNull().unique(),
   content: text('content').notNull(),
+  contentMarkdown: text('content_markdown'),
   excerpt: text('excerpt'),
   author: varchar('author', { length: 255 }).notNull(),
   isPublished: boolean('is_published').default(false),
