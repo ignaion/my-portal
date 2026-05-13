@@ -1,13 +1,17 @@
-import { Controller, Get, Post, Body, Param, Query, Headers, ForbiddenException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Headers, ForbiddenException, Req, Inject } from '@nestjs/common';
 import { Request } from 'express';
 import { BlogService } from './blog.service';
 import { blogPosts } from '../../db/schema';
+import { AuthService } from '../auth/auth.service';
 
 type CreatePostDto = typeof blogPosts.$inferInsert;
 
 @Controller('api/blog')
 export class BlogController {
-  constructor(private readonly blogService: BlogService) {}
+  constructor(
+    private readonly blogService: BlogService,
+    @Inject(AuthService) private readonly authService: AuthService,
+  ) {}
 
   @Get()
   async getAllPosts(@Query('published') published: string) {
@@ -40,21 +44,30 @@ export class BlogController {
   }
 
   @Post()
-  async createPost(@Body() createPostDto: CreatePostDto, @Headers('x-admin-key') adminKey?: string) {
-    // Temporary logging for debugging admin key mismatch (do not keep long-term)
-    try {
-      const env = process.env.ADMIN_API_KEY;
-      const headerSample = adminKey ? adminKey.slice(0, 6) + '...' : null;
-      const envLen = env ? env.length : null;
-      console.log('[DEBUG] createPost called. headerSample=', headerSample, 'envLen=', envLen);
-    } catch (e) {
-      // ignore
+  async createPost(
+    @Body() createPostDto: CreatePostDto,
+    @Headers('x-admin-key') adminKey?: string,
+    @Headers('authorization') authorization?: string,
+  ) {
+    // Accept either ADMIN_API_KEY via x-admin-key OR a valid JWT (Bearer)
+    const expected = process.env.ADMIN_API_KEY;
+    let ok = false;
+
+    if (expected && adminKey === expected) ok = true;
+
+    if (!ok && authorization) {
+      const parts = authorization.split(' ');
+      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+        const token = parts[1];
+        const verified = this.authService.verifyToken(token);
+        if (verified) ok = true;
+      }
     }
 
-    const expected = process.env.ADMIN_API_KEY;
-    if (!expected || adminKey !== expected) {
-      throw new ForbiddenException('Invalid admin key');
+    if (!ok) {
+      throw new ForbiddenException('Invalid admin credentials');
     }
+
     return this.blogService.createPost(createPostDto);
   }
 }
