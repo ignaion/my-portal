@@ -1,5 +1,6 @@
 <template>
   <section class="max-w-3xl mx-auto py-8">
+    <AdminNav />
     <h1 class="text-2xl font-bold mb-4">Admin - New Post</h1>
     <form @submit.prevent="submit">
       <label class="block mb-2">Title</label>

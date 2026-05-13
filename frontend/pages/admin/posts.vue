@@ -1,5 +1,6 @@
 <template>
   <section class="max-w-5xl mx-auto py-8">
+    <AdminNav />
     <h1 class="text-2xl font-bold mb-4">Admin — Posts</h1>
 
     <div class="mb-4 flex gap-2">
