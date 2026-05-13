@@ -35,10 +35,8 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBaseUrl || 'https://igna.my.id'
-const token = localStorage.getItem('admin_token')
-let header: any = {}
-if (token) header.Authorization = `Bearer ${token}`
-else if (config.public.NUXT_PUBLIC_ADMIN_KEY) header['x-admin-key'] = config.public.NUXT_PUBLIC_ADMIN_KEY
+const token = ref<string|null>(null)
+const header = ref<any>({})
 
 const q = ref('')
 const filter = ref('published')
@@ -52,7 +50,7 @@ const fetchPosts = async () => {
     if (filter.value === 'published') url += '?published=true'
     else if (filter.value === 'drafts') url += '?published=false'
     // all -> omit param
-    const res = await $fetch(url, { headers: header })
+    const res = await $fetch(url, { headers: header.value })
     posts.value = res
   } catch (e) {
     alert('Failed to fetch posts')
@@ -61,7 +59,19 @@ const fetchPosts = async () => {
   }
 }
 
-onMounted(fetchPosts)
+onMounted(() => {
+  // access localStorage only on client to avoid SSR crash
+  if (process.client) {
+    const t = localStorage.getItem('admin_token')
+    token.value = t
+    if (t) header.value = { Authorization: `Bearer ${t}` }
+    else if (config.public.NUXT_PUBLIC_ADMIN_KEY) header.value = { 'x-admin-key': config.public.NUXT_PUBLIC_ADMIN_KEY }
+  } else {
+    // server-side: prefer admin key from runtime config if present
+    if (config.public.NUXT_PUBLIC_ADMIN_KEY) header.value = { 'x-admin-key': config.public.NUXT_PUBLIC_ADMIN_KEY }
+  }
+  fetchPosts()
+})
 
 const filtered = computed(() => {
   if (!q.value) return posts.value
