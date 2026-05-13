@@ -9,7 +9,7 @@
     "start:prod": "node dist/main",
     "db:push": "drizzle-kit push:pg",
     "db:studio": "drizzle-kit studio",
-    "seed": "ts-node ./scripts/seed.ts"
+    "seed": "node ./scripts/seed.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -24,7 +24,10 @@
     "dotenv": "^16.4.0",
     "marked": "^5.1.0",
     "jsdom": "^22.1.0",
-    "dompurify": "^3.0.4"
+    "dompurify": "^3.0.4",
+    "@mikro-orm/core": "^5.0.0",
+    "@mikro-orm/postgresql": "^5.0.0",
+    "@mikro-orm/nestjs": "^5.0.0"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
