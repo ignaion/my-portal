@@ -41,6 +41,8 @@ export class BlogService {
 
     if (values.contentMarkdown) {
       values.content = renderMarkdownToSafeHtml(values.contentMarkdown);
+      // store original markdown as well
+      values.content_markdown = values.contentMarkdown;
       delete values.contentMarkdown;
     } else if (values.content) {
       values.content = renderMarkdownToSafeHtml(values.content);
@@ -55,7 +57,9 @@ export class BlogService {
     if (values.slug && values.slug !== slug) {
       const [exists] = await this.db.select().from(blogPosts).where(eq(blogPosts.slug, values.slug));
       if (exists) {
-        throw new Error('Slug already exists');
+        const err: any = new Error('Slug already exists');
+        err.code = 'SLUG_EXISTS';
+        throw err;
       }
     }
 
