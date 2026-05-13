@@ -34,7 +34,7 @@ const submit = async () => {
     if (token) {
       localStorage.setItem('admin_token', token)
       alert('Login successful')
-      router.push('/admin/new')
+      router.push('/admin/posts')
     } else {
       alert('Invalid credentials')
     }
