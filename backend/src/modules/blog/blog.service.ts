@@ -24,6 +24,8 @@ export class BlogService {
     const values = { ...createPostDto } as any;
     if (values.contentMarkdown) {
       values.content = renderMarkdownToSafeHtml(values.contentMarkdown);
+      // store original markdown as well
+      values.contentMarkdown = createPostDto.contentMarkdown;
     } else if (values.content) {
       // sanitize HTML content as a fallback
       values.content = renderMarkdownToSafeHtml(values.content);
