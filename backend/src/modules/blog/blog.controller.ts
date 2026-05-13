@@ -15,7 +15,9 @@ export class BlogController {
 
   @Get()
   async getAllPosts(@Query('published') published: string) {
-    const isPublished = published === 'true';
+    // If no `published` query provided, default to showing only published posts to public viewers.
+    // Previous code used `published === 'true'` which converts undefined -> false and returned drafts unintentionally.
+    const isPublished = published === undefined ? true : published === 'true';
     return this.blogService.getPosts(isPublished);
   }
 
