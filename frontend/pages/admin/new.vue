@@ -38,20 +38,29 @@ const isPublished = ref(false)
 
 const submit = async () => {
   const apiBase = config.public.apiBaseUrl || 'https://igna.my.id'
-  const resp = await $fetch(`${apiBase}/api/blog`, {
-    method: 'POST',
-    headers: {
-      'x-admin-key': adminKey
-    },
-    body: {
-      title: title.value,
-      slug: slug.value,
-      excerpt: excerpt.value,
-      contentMarkdown: contentMarkdown.value,
-      author: 'Igna',
-      isPublished: isPublished.value
-    }
-  })
-  alert('Post created')
+  const token = localStorage.getItem('admin_token')
+  const headers: any = { 'Content-Type': 'application/json' }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  else if (adminKey) headers['x-admin-key'] = adminKey
+
+  try {
+    const resp = await $fetch(`${apiBase}/api/blog`, {
+      method: 'POST',
+      headers,
+      body: {
+        title: title.value,
+        slug: slug.value,
+        excerpt: excerpt.value,
+        contentMarkdown: contentMarkdown.value,
+        author: 'Igna',
+        isPublished: isPublished.value
+      }
+    })
+    alert('Post created')
+    // redirect to blog list
+    window.location.href = '/blog'
+  } catch (e) {
+    alert('Failed to create post: ' + (e?.data?.message || e?.message || e))
+  }
 }
 </script>
