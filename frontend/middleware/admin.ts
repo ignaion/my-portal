@@ -1,8 +1,10 @@
 export default defineNuxtRouteMiddleware((to) => {
-  // Protect any /admin route
+  // This middleware is intended to run globally for all routes and block access to /admin
+  // If included as a non-global file it won't run automatically. Ensure filename ends with .global.ts
+
   if (!to.path.startsWith('/admin')) return
 
-  // On server, prevent SSR of admin pages (redirect to login)
+  // On server, redirect to /admin/login so SSR does not render admin pages to unauthenticated users
   if (process.server) {
     return navigateTo('/admin/login')
   }
